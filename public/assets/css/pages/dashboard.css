@@ -1,0 +1,64 @@
+/* ==========================================================================
+   CSS Khusus: Halaman Dashboard (Views/dashboard/index.php)
+   ========================================================================== */
+
+/* Animasi hover pada card ringkasan & aksi */
+.quota-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.quota-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+
+/* Ikon dekoratif latar belakang di card kuota eligible */
+.quota-icon-bg {
+    position: absolute; right: -10px; top: -10px;
+    font-size: 80px; color: rgba(13, 110, 253, 0.05);
+    transform: rotate(-15deg); pointer-events: none;
+}
+.quota-icon-bg.warning { color: rgba(255, 193, 7, 0.05); }
+
+/* Animasi hover pada card distribusi kesiapan nilai */
+.distribution-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.distribution-card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.08) !important; }
+
+/* Animasi hover pada semua card interaktif */
+.summary-card, .action-card, .ranking-status-card, .saw-card {
+    transition: all 0.3s ease;
+}
+.summary-card:hover, .action-card:hover, .ranking-status-card:hover, .saw-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+/* Efek hover pada baris kriteria SAW */
+.criteria-item:hover { border-color: #0d6efd !important; background-color: #f8fbff !important; cursor: default; }
+.transition-all { transition: all 0.2s ease-in-out; }
+
+/* Grafik donut kesiapan data (versi dashboard – lebih kecil dari yang di style.css global) */
+.donut-container { width: 70px; height: 70px; }
+.donut-ready {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: conic-gradient(var(--color) calc(var(--ready) * 1%), transparent 0);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    transition: background 0.5s ease;
+}
+.donut-ready::after {
+    content: "";
+    position: absolute;
+    width: 54px; height: 54px;
+    background: white;
+    border-radius: 50%;
+}
+.donut-text {
+    position: relative; z-index: 1;
+    font-size: 0.85rem; font-weight: 800; color: #1e293b;
+}
+
+/* Badge bulat kecil sebagai indikator warna jurusan */
+.dot-badge { width: 8px; height: 8px; border-radius: 50%; padding: 0; }
+
+/* Animasi tombol "Lihat Kelengkapan Data" di card distribusi */
+.btn-cute:hover {
+    filter: brightness(0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+}

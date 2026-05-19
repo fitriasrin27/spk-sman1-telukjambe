@@ -1,0 +1,30 @@
+/* ==========================================================================
+   CSS Khusus: Halaman Profil (Views/profile/index.php)
+   ========================================================================== */
+
+/* Badge warna ungu untuk role BK */
+.bg-purple {
+    background-color: #6f42c1;
+    color: white;
+}
+
+/* Override fokus input di halaman profil (lebih kuat dari global) */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+}
+
+/* Animasi tombol kamera saat hover di foto profil */
+.profile-avatar-wrapper:hover label {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Animasi card naik saat di-hover */
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}

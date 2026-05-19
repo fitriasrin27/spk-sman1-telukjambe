@@ -1,0 +1,15 @@
+/vendor/
+/public/uploads/laporan/*
+/public/uploads/leger/*
+!/public/uploads/laporan/.gitkeep
+!/public/uploads/leger/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
+*.log
+.env
+
+# Abaikan foto profil agar privasi aman
+/public/public/uploads/profile/*
+!/public/public/uploads/profile/.gitkeep
+/public/uploads/profile/*
+!/public/uploads/profile/.gitkeep

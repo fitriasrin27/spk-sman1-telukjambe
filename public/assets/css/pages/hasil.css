@@ -1,0 +1,170 @@
+/* ==========================================================================
+   CSS Khusus: Modul Hasil (Eligible & Peringkat Kelas)
+   Mencakup: index, lihat hasil, dan modal laporan preview PDF
+   ========================================================================== */
+
+/* --- [1] Halaman Riwayat Hasil & Detail Lihat --- */
+.pagination .page-link {
+    border: none;
+    padding: 0.4rem 0.75rem;
+    margin: 0 2px;
+    border-radius: 4px;
+    color: #666;
+    font-weight: 500;
+    background: transparent;
+}
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd !important;
+    color: white !important;
+}
+.pagination .page-item.disabled .page-link {
+    background: transparent;
+    color: #ccc;
+}
+.table-bordered th, .table-bordered td {
+    border-color: #dee2e6 !important;
+}
+.table thead th {
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    vertical-align: middle;
+}
+.riwayat-row:hover {
+    background-color: rgba(13, 110, 253, 0.02);
+}
+
+/* Badges rank di tabel lihat hasil */
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 44px;
+    height: 24px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+.rank-1 { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+.rank-2 { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; }
+.rank-3 { background: #fff7ed; color: #9a3412; border: 1px solid #fdba74; }
+
+
+/* --- [2] Modal Preview Laporan PDF --- */
+#previewContainerEligible,
+#previewContainerKelas {
+    background: #525659;
+    padding: 30px;
+    border-radius: 0 0 8px 8px;
+    height: calc(100vh - 200px);
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.pdf-preview-box {
+    background: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    padding: 40px;
+    transform-origin: top center;
+    transition: transform 0.2s ease-out;
+    font-family: 'Times New Roman', serif;
+    color: black;
+    margin-bottom: 50px;
+}
+.pdf-preview-box.portrait {
+    width: 210mm;
+    min-height: 297mm;
+}
+.pdf-preview-box.landscape {
+    width: 297mm;
+    min-height: 210mm;
+}
+.preview-kop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px double black;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.preview-kop img {
+    height: 80px;
+    width: 80px;
+    object-fit: contain;
+}
+.preview-kop-text {
+    text-align: center;
+    flex: 1;
+}
+.preview-title {
+    text-align: center;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-size: 18px;
+}
+.preview-info {
+    margin-bottom: 20px;
+}
+.preview-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.preview-table th, .preview-table td {
+    border: 1px solid black;
+    padding: 2px 4px;
+    text-align: center;
+}
+.pdf-preview-box.portrait .preview-table th, 
+.pdf-preview-box.portrait .preview-table td {
+    font-size: 11px;
+}
+.pdf-preview-box.landscape .preview-table th, 
+.pdf-preview-box.landscape .preview-table td {
+    font-size: 13px;
+}
+.preview-table thead th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+.preview-footer {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+}
+.footer-ttd {
+    text-align: center;
+    width: 250px;
+}
+.eligible-divider {
+    background-color: #fffbeb;
+    color: #b45309;
+    font-weight: bold;
+    font-size: 10px;
+}
+.text-center { text-align: center !important; }
+.text-left { text-align: left !important; }
+
+.modal-content-laporan,
+.modal-content-laporan-kelas {
+    height: calc(100vh - 40px);
+}
+.modal-body-laporan,
+.modal-body-laporan-kelas {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.config-scroll-eligible,
+.config-scroll-kelas {
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding-right: 15px;
+}
+@media (min-width: 1200px) {
+    .modal-xl-custom,
+    .modal-xl-custom-kelas { max-width: 98%; }
+}

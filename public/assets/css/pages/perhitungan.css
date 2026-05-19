@@ -1,0 +1,132 @@
+/* ==========================================================================
+   Modul Perhitungan CSS
+   ========================================================================== */
+
+/* Badge Peringkat Perunggu */
+.badge-bronze { 
+    background-color: #cd7f32 !important; 
+    color: white !important; 
+}
+
+.bg-bronze {
+    background-color: #cd7f32 !important;
+    color: white !important;
+}
+
+/* Separator Aksi Tabel */
+.aksi-separator { 
+    display: inline-block; 
+    width: 1px; 
+    height: 16px; 
+    background: #dee2e6; 
+    flex-shrink: 0; 
+}
+
+.aksi-separator-eligible {
+    width: 1px;
+    height: 18px;
+    background-color: #e9ecef;
+    margin: 0 15px;
+    display: inline-block;
+}
+
+/* Hover States untuk Tombol Aksi */
+.btn-outline-info:hover, 
+.btn-outline-danger:hover { 
+    color: #fff !important; 
+}
+.btn-outline-info:hover i, 
+.btn-outline-danger:hover i { 
+    color: #fff !important; 
+}
+
+/* Custom Lilac Color Theme */
+.btn-outline-lilac { 
+    color: #a280b9; 
+    border-color: #a280b9; 
+}
+.btn-outline-lilac:hover { 
+    color: #fff; 
+    background-color: #a280b9; 
+    border-color: #a280b9; 
+}
+
+/* Reset / standardisasi Tabel Small */
+.table.small { 
+    font-size: 0.85rem; 
+}
+.table thead th { 
+    font-weight: 600; 
+    text-transform: none; 
+    letter-spacing: 0; 
+}
+
+/* Panel Seleksi Pendaftar Eligible */
+.btn-kelas.active { 
+    font-weight: 600; 
+}
+
+#tabelSiswaEligible tbody tr.row-hidden { 
+    display: none; 
+}
+
+#tabelSiswaEligible tbody tr.row-terdaftar td:first-child::after {
+    content: '✓';
+    color: #198754;
+    font-weight: bold;
+    margin-left: 2px;
+}
+
+/* Modul PDSS Mapel Badges & Tabs */
+.mapel-badge {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s;
+    border: 1px solid #dee2e6;
+    position: relative;
+}
+
+.mapel-badge:hover {
+    background-color: #e9ecef;
+}
+
+.mapel-badge.selected {
+    background-color: #198754;
+    color: white;
+    border-color: #198754;
+}
+
+.mapel-badge .urutan {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.mapel-badge.selected .urutan {
+    display: flex;
+}
+
+#pdssTab .nav-link { 
+    color: #495057; 
+    border-color: transparent; 
+}
+
+#pdssTab .nav-link:hover { 
+    border-color: #e9ecef #e9ecef transparent; 
+}
+
+#pdssTab .nav-link.active { 
+    color: #198754 !important; 
+    border-color: #dee2e6 #dee2e6 #fff; 
+    border-bottom: 2px solid #198754; 
+}

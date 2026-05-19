@@ -1,0 +1,34 @@
+/* ==========================================================================
+   CSS Khusus: Halaman Kelola Akun (Views/akun/index.php)
+   ========================================================================== */
+
+/* Override page-header untuk halaman akun (lebih tebal dari global) */
+.page-header {
+    border-bottom: 2.5px solid #c0c0c0;
+    padding-bottom: 0.5rem;
+}
+
+/* Tabel akun dengan border eksplisit */
+.custom-table {
+    border: 1px solid #dee2e6;
+}
+
+.custom-table thead th {
+    background-color: #f2f2f2;
+    border-bottom: 1.5px solid #dee2e6;
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* Warna paginasi halaman akun */
+.pagination .page-link {
+    color: #334155;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    margin: 0 1px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}

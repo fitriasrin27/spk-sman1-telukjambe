@@ -1,0 +1,142 @@
+/* ==========================================================================
+   CSS FOR PDF REPORT TEMPLATE
+   ========================================================================== */
+
+/* PAGE CONFIG */
+@page {
+    margin: 0.5cm;
+}
+
+/* BODY ELEMENT */
+body {
+    font-family: 'Times New Roman', serif;
+    font-size: 9px;
+    color: black;
+    line-height: 1.1;
+    box-sizing: border-box;
+}
+
+/* KOP SURAT */
+.kop-surat {
+    border-bottom: 3px double #000;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    width: 100%;
+}
+.kop-table {
+    width: 100%;
+    border: none;
+}
+.kop-table td {
+    border: none;
+    text-align: center;
+    vertical-align: middle;
+}
+.logo {
+    width: 80px;
+}
+.kop-text .kop-h1 {
+    font-size: 16px;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+.kop-text .kop-h2 {
+    font-size: 14px;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+.kop-text .kop-h3 {
+    font-size: 16px;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+.kop-text p {
+    font-size: 10px;
+    margin: 0;
+    font-style: italic;
+}
+
+/* REPORT TITLE */
+.report-title {
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-top: 15px;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+}
+
+/* INFO METADATA */
+.info-table {
+    width: 100%;
+    margin-bottom: 8px;
+    font-size: 10px;
+}
+.info-table td {
+    padding: 2px 0;
+}
+
+/* DATA TABLE */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+    table-layout: auto;
+}
+.data-table th, .data-table td {
+    border: 1px solid black;
+    padding: 0.5px 2px;
+    text-align: center;
+    font-size: 9px;
+    word-wrap: break-word;
+}
+.data-table th:last-child, .data-table td:last-child {
+    border-right: 1px solid black !important;
+}
+.data-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+/* UTILITY CLASSES */
+.text-left { text-align: left !important; }
+.text-center { text-align: center !important; }
+.row-eligible { background-color: #f1f9f1; }
+.row-not-eligible { background-color: #fff5f5; }
+.eligible-divider {
+    background-color: #fffbeb;
+    color: #b45309;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+/* FOOTER & SIGNATURE */
+.footer {
+    width: 100%;
+    margin-top: 15px;
+}
+.footer-table {
+    width: 100%;
+    border: none;
+}
+.footer-table td {
+    border: none;
+    width: 33%;
+    vertical-align: top;
+}
+.sign-box {
+    text-align: center;
+}
+.sign-space {
+    height: 60px;
+}
+.sign-box strong {
+    display: block;
+    margin-top: 0px; 
+    margin-bottom: -5px;
+}

@@ -13,12 +13,15 @@
                 <strong id="hapusNama" class="d-block text-danger" style="font-size: 1rem;"></strong>
                 <span id="hapusNisn" class="d-block text-muted" style="font-size: 0.8rem;">NISN: —</span>
             </div>
-            <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
-                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
-                <a id="hapusLink" href="#" class="btn btn-danger px-4">
-                    <i class="bi bi-trash3 me-1"></i>Hapus
-                </a>
-            </div>
+            <form id="formHapusSiswa" method="POST" action="">
+                <input type="hidden" name="id" id="hapusInputId" value="">
+                <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="bi bi-trash3 me-1"></i>Hapus
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

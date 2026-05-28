@@ -74,7 +74,11 @@ document.addEventListener('DOMContentLoaded', function () {
             var deleteUrl = btn.dataset.deleteUrl;
             document.getElementById('hapusNama').textContent = this.dataset.nama;
             document.getElementById('hapusNisn').textContent = 'NISN: ' + (this.dataset.nisn || '-');
-            document.getElementById('hapusLink').href = deleteUrl + '&id=' + this.dataset.id;
+            var form = document.getElementById('formHapusSiswa');
+            if (form) {
+                form.action = deleteUrl;
+                document.getElementById('hapusInputId').value = this.dataset.id;
+            }
         });
     });
 
@@ -97,8 +101,11 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function () {
             document.getElementById('hapusRkNama').textContent = this.dataset.nama;
             document.getElementById('hapusRkSemLabel').textContent = this.dataset.semLabel || '';
-            document.getElementById('hapusRkLink').href =
-                this.dataset.deleteUrl + '&id=' + this.dataset.id;
+            var form = document.getElementById('formHapusRiwayatKelas');
+            if (form) {
+                form.action = this.dataset.deleteUrl;
+                document.getElementById('hapusIdRiwayatKelas').value = this.dataset.id;
+            }
         });
     });
 
@@ -131,7 +138,11 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function () {
             document.getElementById('hapusKodeMapel').textContent = this.dataset.kode;
             document.getElementById('hapusNamaMapel').textContent = this.dataset.nama;
-            document.getElementById('btnConfirmHapusMapel').href = this.dataset.deleteUrl + '&id=' + this.dataset.id;
+            var form = document.getElementById('formHapusMapel');
+            if (form) {
+                form.action = this.dataset.deleteUrl;
+                document.getElementById('hapusIdMapel').value = this.dataset.id;
+            }
         });
     });
 
@@ -139,14 +150,15 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-nilai-hapus').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const namaTarget = document.getElementById('hapusNilaiNama');
-            const linkTarget = document.getElementById('btnConfirmHapusNilai');
+            const form = document.getElementById('formHapusNilai');
 
             if (namaTarget) {
                 namaTarget.textContent = this.dataset.nama || '';
             }
 
-            if (linkTarget) {
-                linkTarget.href = this.dataset.deleteUrl + '&id=' + this.dataset.id;
+            if (form) {
+                form.action = this.dataset.deleteUrl;
+                document.getElementById('hapusIdNilai').value = this.dataset.id;
             }
         });
     });

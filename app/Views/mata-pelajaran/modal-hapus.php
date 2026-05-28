@@ -14,13 +14,16 @@
                     Apakah Anda yakin ingin menghapus mapel <strong id="hapusNamaMapel" class="text-dark"></strong> (<span id="hapusKodeMapel"></span>)?<br>
                     <span class="small text-danger">Tindakan ini tidak dapat dibatalkan. Nilai siswa yang terkait dengan mapel ini juga akan terhapus.</span>
                 </p>
-                <!-- Tombol Aksi -->
-                <div class="d-flex justify-content-center gap-2">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <a href="#" id="btnConfirmHapusMapel" class="btn btn-danger">
-                        <i class="bi bi-trash3 me-1"></i>Ya, Hapus Data
-                    </a>
-                </div>
+                <form id="formHapusMapel" method="POST" action="">
+                    <input type="hidden" name="id" id="hapusIdMapel" value="">
+                    <!-- Tombol Aksi -->
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash3 me-1"></i>Ya, Hapus Data
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

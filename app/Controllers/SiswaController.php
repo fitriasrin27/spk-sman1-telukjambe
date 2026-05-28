@@ -81,6 +81,8 @@ class SiswaController extends Controller
         $semester = $model->hitungSemester(trim($_POST['kelas']), $_POST['semester_jenis']);
         $model->insertRiwayatKelas($idSiswa, trim($_POST['tahun_ajaran']), trim($_POST['kelas']), $semester);
 
+        log_activity("Menambahkan siswa baru: " . trim($_POST['nama']) . " (NISN: " . trim($_POST['nisn']) . ")", 'siswa');
+
         push_notif('Data siswa berhasil ditambahkan.');
 
         $this->redirect('siswa');
@@ -112,7 +114,29 @@ class SiswaController extends Controller
             return;
         }
 
+        $old = $model->findById($id);
+        $changes = [];
+        if ($old) {
+            if (trim($old['nama']) !== trim($_POST['nama'] ?? '')) {
+                $changes[] = "Nama '" . $old['nama'] . "' → '" . trim($_POST['nama']) . "'";
+            }
+            if (trim($old['nisn']) !== trim($_POST['nisn'] ?? '')) {
+                $changes[] = "NISN '" . $old['nisn'] . "' → '" . trim($_POST['nisn']) . "'";
+            }
+            if (trim($old['nis']) !== trim($_POST['nis'] ?? '')) {
+                $changes[] = "NIS '" . $old['nis'] . "' → '" . trim($_POST['nis']) . "'";
+            }
+            $oldJk = ($old['jenis_kelamin'] ?? '') === 'L' ? 'Laki-laki' : 'Perempuan';
+            $newJk = ($_POST['jenis_kelamin'] ?? '') === 'L' ? 'Laki-laki' : 'Perempuan';
+            if (($old['jenis_kelamin'] ?? '') !== ($_POST['jenis_kelamin'] ?? '')) {
+                $changes[] = "Jenis Kelamin '" . $oldJk . "' → '" . $newJk . "'";
+            }
+        }
+
         $model->update($_POST);
+
+        $detailStr = !empty($changes) ? " (" . implode(", ", $changes) . ")" : " (tidak ada perubahan)";
+        log_activity("Memperbarui data siswa: " . trim($_POST['nama']) . $detailStr, 'siswa');
 
         push_notif('Data siswa berhasil diperbarui.');
 
@@ -123,11 +147,20 @@ class SiswaController extends Controller
     {
         require_login();
 
-        $id = $_GET['id'] ?? null;
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('siswa');
+            return;
+        }
+
+        $id = $_POST['id'] ?? null;
 
         if ($id) {
             $model = new \App\Models\Siswa();
-            $model->delete($id);
+            $siswa = $model->findById((int)$id);
+            $nama = $siswa ? $siswa['nama'] : "ID {$id}";
+            $model->delete((int)$id);
+
+            log_activity("Menghapus data siswa: {$nama}", 'siswa');
 
             push_notif('Data siswa berhasil dihapus.');
         }
@@ -158,6 +191,9 @@ class SiswaController extends Controller
                 $model->delete((int)$id);
             }
             $db->commit();
+            
+            log_activity("Menghapus massal " . count($ids) . " data siswa", 'siswa');
+            
             push_notif(count($ids) . ' data siswa berhasil dihapus.');
         } catch (\Exception $e) {
             $db->rollBack();
@@ -261,6 +297,8 @@ class SiswaController extends Controller
             $this->redirect('siswa');
             return;
         }
+
+        log_activity("Mengimpor data siswa via Excel (Berhasil: {$imported}, Dilewati: {$skipped})", 'siswa');
 
         push_notif("$imported siswa berhasil diimport" .
                    ($skipped > 0 ? ", $skipped diabaikan (data sudah ada)." : '.'));

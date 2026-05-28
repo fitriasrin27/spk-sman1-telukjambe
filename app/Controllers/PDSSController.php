@@ -100,6 +100,10 @@ class PDSSController extends Controller
             $rowNum++;
         }
 
+        log_activity("Mengekspor data NISN siswa eligible PDSS ({$riwayat['jurusan']}, Angkatan: {$riwayat['tahun_ajaran']}) ke format " . strtoupper($format), 'laporan');
+
+        push_notif("Data NISN siswa eligible PDSS ({$riwayat['jurusan']} - {$riwayat['tahun_ajaran']}) berhasil diekspor.");
+
         $this->downloadSpreadsheet($spreadsheet, $filename, $format);
     }
 
@@ -209,6 +213,10 @@ class PDSSController extends Controller
             }
             $rowNum++;
         }
+
+        log_activity("Mengekspor data nilai PDSS ({$jurusan}, Kelas: {$tingkat}, Semester: {$smt}, Angkatan: {$riwayat['tahun_ajaran']}) ke format " . strtoupper($format), 'laporan');
+
+        push_notif("Data nilai PDSS ({$jurusan} - Kelas {$tingkat} Semester {$smt}) berhasil diekspor.");
 
         $this->downloadSpreadsheet($spreadsheet, $filename, $format);
     }

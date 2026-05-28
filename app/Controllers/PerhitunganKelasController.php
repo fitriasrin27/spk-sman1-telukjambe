@@ -107,6 +107,9 @@ class PerhitunganKelasController extends Controller
                 $hasilSAW = $model->hitungSAW($dataSiswa, $tahunAjaran, $kelas, $semesterTarget, $idUser);
                 $idPerhitungan = $hasilSAW['id_perhitungan'] ?? 0;
                 $jumlah   = count($hasilSAW['hasil']);
+                
+                log_activity("Menjalankan kalkulasi Peringkat Kelas SAW: Kelas {$kelas} ({$tahunAjaran} - Semester {$semesterLabel})", 'perhitungan');
+                
                 push_notif("Peringkat kelas $kelas berhasil dihitung! $jumlah siswa telah diranking.");
             }
         } catch (\Throwable $e) {
@@ -137,6 +140,7 @@ class PerhitunganKelasController extends Controller
         if ($id > 0) {
             $model = new PerhitunganKelas();
             if ($model->deleteBatch($id)) {
+                log_activity("Menghapus riwayat perhitungan Peringkat Kelas ID: #{$id}", 'perhitungan');
                 push_notif("Riwayat perhitungan #$id berhasil dihapus.");
             } else {
                 $_SESSION['error'] = "Gagal menghapus riwayat perhitungan #$id.";
@@ -176,6 +180,7 @@ class PerhitunganKelasController extends Controller
                 $model->deleteBatch((int)$id);
             }
             $db->commit();
+            log_activity("Menghapus massal " . count($ids) . " riwayat perhitungan Peringkat Kelas", 'perhitungan');
             push_notif(count($ids) . ' riwayat perhitungan berhasil dihapus.');
         } catch (\Exception $e) {
             $db->rollBack();

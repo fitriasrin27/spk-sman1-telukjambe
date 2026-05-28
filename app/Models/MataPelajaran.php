@@ -183,6 +183,15 @@ class MataPelajaran
         ]);
     }
 
+    public function findById(int $id): ?array
+    {
+        $db = Database::connect();
+        $stmt = $db->prepare('SELECT * FROM mata_pelajaran WHERE id_mapel = :id');
+        $stmt->execute([':id' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result : null;
+    }
+
     public function delete(int $id): bool
     {
         $stmt = Database::connect()->prepare('DELETE FROM mata_pelajaran WHERE id_mapel = :id');

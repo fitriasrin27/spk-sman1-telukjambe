@@ -59,9 +59,8 @@
 <!-- MODAL HAPUS -->
 <div class="modal fade" id="modalHapusEligible" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form class="modal-content" method="GET" action="<?= e(url('')) ?>">
+        <form class="modal-content" method="POST" action="<?= e(url('perhitungan/eligible-delete')) ?>">
             <!-- Hidden Input -->
-            <input type="hidden" name="url" value="perhitungan/eligible-delete">
             <input type="hidden" name="id" id="hapusEligibleId" value="">
             <!-- Header Modal -->
             <div class="modal-header border-0 pb-0">

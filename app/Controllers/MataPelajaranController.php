@@ -68,6 +68,7 @@ class MataPelajaranController extends Controller
             $model = new \App\Models\MataPelajaran();
             $inserted = 0;
             $skipped = 0;
+            $insertedList = [];
 
             foreach ($mapel as $m) {
                 $kode = trim($m['kode'] ?? '');
@@ -87,12 +88,16 @@ class MataPelajaranController extends Controller
                     'jurusan'    => $jurusan,
                 ]);
                 $inserted++;
+                $insertedList[] = "{$nama} ({$kode})";
             }
 
             if ($inserted > 0) {
                 $msg = "$inserted mata pelajaran berhasil ditambahkan ke Tingkat $tingkat $jurusan.";
                 if ($skipped > 0) $msg .= " ($skipped dilewati karena duplikat)";
                 push_notif($msg);
+
+                $insertedDetail = implode(', ', $insertedList);
+                log_activity("Menambahkan {$inserted} mata pelajaran baru ke Tingkat {$tingkat} {$jurusan}: {$insertedDetail}", 'siswa');
             } elseif ($skipped > 0) {
                 $_SESSION['error'] = 'Semua mapel yang dimasukkan sudah ada (duplikat).';
             } else {
@@ -132,6 +137,23 @@ class MataPelajaranController extends Controller
         if (!empty($errors)) {
             $_SESSION['error'] = implode('<br>', $errors);
         } else {
+            $old = $model->findById($id);
+            $changes = [];
+            if ($old) {
+                if (trim($old['kode_mapel']) !== $kode) {
+                    $changes[] = "Kode Mapel '" . $old['kode_mapel'] . "' → '" . $kode . "'";
+                }
+                if (trim($old['nama_mapel']) !== $nama) {
+                    $changes[] = "Nama Mapel '" . $old['nama_mapel'] . "' → '" . $nama . "'";
+                }
+                if (trim($old['tingkat']) !== $tingkat) {
+                    $changes[] = "Tingkat '" . $old['tingkat'] . "' → '" . $tingkat . "'";
+                }
+                if (trim($old['jurusan']) !== $jurusan) {
+                    $changes[] = "Jurusan '" . $old['jurusan'] . "' → '" . $jurusan . "'";
+                }
+            }
+
             $model->update([
                 'id_mapel'   => $id,
                 'kode_mapel' => $kode,
@@ -139,6 +161,12 @@ class MataPelajaranController extends Controller
                 'tingkat'    => $tingkat,
                 'jurusan'    => $jurusan,
             ]);
+
+            $detailStr = !empty($changes) ? " (" . implode(", ", $changes) . ")" : " (tidak ada perubahan)";
+            $mapelName = $old ? $old['nama_mapel'] : $nama;
+            $mapelCode = $old ? $old['kode_mapel'] : $kode;
+            log_activity("Memperbarui mata pelajaran: " . $mapelName . " (" . $mapelCode . ")" . $detailStr, 'siswa');
+
             push_notif('Mata pelajaran berhasil diperbarui.');
         }
 
@@ -149,9 +177,23 @@ class MataPelajaranController extends Controller
     {
         require_login();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('mata-pelajaran');
+            return;
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
-            (new \App\Models\MataPelajaran())->delete($id);
+            $model = new \App\Models\MataPelajaran();
+            $old = $model->findById($id);
+            $model->delete($id);
+
+            if ($old) {
+                log_activity("Menghapus mata pelajaran: " . $old['nama_mapel'] . " (" . $old['kode_mapel'] . ")", 'siswa');
+            } else {
+                log_activity("Menghapus mata pelajaran ID {$id}", 'siswa');
+            }
+
             push_notif('Mata pelajaran berhasil dihapus.');
         }
 
@@ -174,6 +216,14 @@ class MataPelajaranController extends Controller
         }
 
         $model = new \App\Models\MataPelajaran();
+        $deletedNames = [];
+        foreach ($ids as $id) {
+            $old = $model->findById((int)$id);
+            if ($old) {
+                $deletedNames[] = $old['nama_mapel'] . " (" . $old['kode_mapel'] . ")";
+            }
+        }
+
         $db = \App\Core\Database::connect();
         try {
             $db->beginTransaction();
@@ -181,6 +231,10 @@ class MataPelajaranController extends Controller
                 $model->delete((int)$id);
             }
             $db->commit();
+
+            $deletedDetail = implode(', ', $deletedNames);
+            log_activity("Menghapus massal " . count($ids) . " mata pelajaran: " . $deletedDetail, 'siswa');
+
             push_notif(count($ids) . ' mata pelajaran berhasil dihapus.');
         } catch (\Exception $e) {
             $db->rollBack();

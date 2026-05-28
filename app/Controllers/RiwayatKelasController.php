@@ -70,7 +70,7 @@ class RiwayatKelasController extends Controller
         if (empty($errors)) {
             $semester = RiwayatKelas::hitungSemester($kelas, $semJenis);
             if ($model->isDuplicate($idSiswa, $tahunAjaran, $semester)) {
-                $errors[] = 'Data penempatan untuk siswa ini di tahun ajaran dan semester yang sama sudah ada.';
+                $errors[] = 'Data penempatan untuk siswa ini di tahun ajaran and semester yang sama sudah ada.';
             }
         }
 
@@ -82,6 +82,13 @@ class RiwayatKelasController extends Controller
 
         $semester = RiwayatKelas::hitungSemester($kelas, $semJenis);
         $model->insert($idSiswa, $tahunAjaran, $kelas, $semester);
+
+        $db = \App\Core\Database::connect();
+        $stmt = $db->prepare('SELECT nama FROM siswa WHERE id_siswa = :id');
+        $stmt->execute([':id' => $idSiswa]);
+        $namaSiswa = $stmt->fetchColumn() ?: "ID {$idSiswa}";
+        $semLabel = RiwayatKelas::labelSemester($semester);
+        log_activity("Menambahkan penempatan kelas siswa: {$namaSiswa} (Tahun Ajaran: {$tahunAjaran}, Kelas: {$kelas}, Semester: {$semLabel})", 'siswa');
 
         push_notif('Penempatan kelas berhasil ditambahkan.');
         $this->redirect('riwayat-kelas');
@@ -124,7 +131,27 @@ class RiwayatKelasController extends Controller
         }
 
         $semester = RiwayatKelas::hitungSemester($kelas, $semJenis);
+        $old = $model->findById($id);
+        $changes = [];
+        if ($old) {
+            if (trim($old['tahun_ajaran']) !== $tahunAjaran) {
+                $changes[] = "Tahun Ajaran '" . $old['tahun_ajaran'] . "' → '" . $tahunAjaran . "'";
+            }
+            if (trim($old['kelas']) !== $kelas) {
+                $changes[] = "Kelas '" . $old['kelas'] . "' → '" . $kelas . "'";
+            }
+            if ((int)$old['semester'] !== $semester) {
+                $oldSemLabel = RiwayatKelas::labelSemester((int)$old['semester']);
+                $newSemLabel = RiwayatKelas::labelSemester($semester);
+                $changes[] = "Semester '" . $oldSemLabel . "' → '" . $newSemLabel . "'";
+            }
+        }
+
         $model->update($id, $tahunAjaran, $kelas, $semester);
+
+        $detailStr = !empty($changes) ? " (" . implode(", ", $changes) . ")" : " (tidak ada perubahan)";
+        $namaSiswa = $old ? $old['nama'] : "ID " . ($old['id_siswa'] ?? 0);
+        log_activity("Memperbarui penempatan kelas siswa: " . $namaSiswa . $detailStr, 'siswa');
 
         push_notif('Data penempatan kelas berhasil diperbarui.');
         $this->redirect('riwayat-kelas');
@@ -135,9 +162,24 @@ class RiwayatKelasController extends Controller
     {
         require_login();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('riwayat-kelas');
+            return;
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
-            (new RiwayatKelas())->delete($id);
+            $model = new RiwayatKelas();
+            $old = $model->findById($id);
+            $model->delete($id);
+
+            if ($old) {
+                $semLabel = RiwayatKelas::labelSemester((int)$old['semester']);
+                log_activity("Menghapus penempatan kelas siswa: " . $old['nama'] . " (Tahun Ajaran: " . $old['tahun_ajaran'] . ", Kelas: " . $old['kelas'] . ", Semester: " . $semLabel . ")", 'siswa');
+            } else {
+                log_activity("Menghapus penempatan kelas ID {$id}", 'siswa');
+            }
+
             push_notif('Data penempatan kelas berhasil dihapus.');
         }
 
@@ -160,6 +202,15 @@ class RiwayatKelasController extends Controller
         }
 
         $model = new RiwayatKelas();
+        $deletedList = [];
+        foreach ($ids as $id) {
+            $old = $model->findById((int)$id);
+            if ($old) {
+                $semLabel = RiwayatKelas::labelSemester((int)$old['semester']);
+                $deletedList[] = $old['nama'] . " (Tahun Ajaran: " . $old['tahun_ajaran'] . ", Kelas: " . $old['kelas'] . ", Semester: " . $semLabel . ")";
+            }
+        }
+
         $db = \App\Core\Database::connect();
         try {
             $db->beginTransaction();
@@ -167,6 +218,10 @@ class RiwayatKelasController extends Controller
                 $model->delete((int)$id);
             }
             $db->commit();
+
+            $deletedDetail = implode(', ', $deletedList);
+            log_activity("Menghapus massal " . count($ids) . " penempatan kelas siswa: " . $deletedDetail, 'siswa');
+
             push_notif(count($ids) . ' data penempatan kelas berhasil dihapus.');
         } catch (\Exception $e) {
             $db->rollBack();
@@ -219,6 +274,7 @@ class RiwayatKelasController extends Controller
         $skipped  = 0; // duplikat
         $notFound = 0; // NISN tidak ada di identitas siswa
         $sheetCount = 0;
+        $importedDetails = [];
 
         foreach ($spreadsheet->getAllSheets() as $sheet) {
             $rows = $sheet->toArray(null, true, true, false);
@@ -244,13 +300,23 @@ class RiwayatKelasController extends Controller
                 if ($nisn === '' || $ta === '' || $kelas === '') continue;
 
                 $semester = RiwayatKelas::hitungSemester($kelas, $semJenis);
+
+                $dbObj = \App\Core\Database::connect();
+                $sel = $dbObj->prepare('SELECT nama FROM siswa WHERE nisn = :nisn');
+                $sel->execute([':nisn' => $nisn]);
+                $namaSiswa = $sel->fetchColumn() ?: "NISN {$nisn}";
+
                 $result   = $model->importRow($nisn, $ta, $kelas, $semester);
 
-                match ($result) {
-                    'inserted'  => $inserted++,
-                    'duplicate' => $skipped++,
-                    'not_found' => $notFound++,
-                };
+                if ($result === 'inserted') {
+                    $inserted++;
+                    $semLabel = RiwayatKelas::labelSemester($semester);
+                    $importedDetails[] = "{$namaSiswa} (TA: {$ta}, Kelas: {$kelas}, Semester: {$semLabel})";
+                } elseif ($result === 'duplicate') {
+                    $skipped++;
+                } else {
+                    $notFound++;
+                }
             }
         }
 
@@ -264,6 +330,11 @@ class RiwayatKelasController extends Controller
         if ($skipped > 0)   $msg .= ", $skipped duplikat dilewati";
         if ($notFound > 0)  $msg .= ", $notFound NISN tidak ditemukan";
         $msg .= '.';
+
+        if ($inserted > 0) {
+            $importedDetail = implode(', ', $importedDetails);
+            log_activity("Mengimpor {$inserted} penempatan kelas siswa via Excel: {$importedDetail}", 'siswa');
+        }
 
         push_notif($msg);
         $this->redirect('riwayat-kelas');

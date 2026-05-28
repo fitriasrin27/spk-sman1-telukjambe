@@ -166,18 +166,26 @@ $filename = "Leger_Nilai_" . str_replace(['/', ' '], '-', $kelas) . "_" . str_re
 
                             <!-- Ekstrakurikuler -->
                             <?php if ($hasEkskul): ?>
-                                <td class="text-start" style="font-size: 6.5pt; line-height: 1.1;">
-                                    <?php foreach ($row['ekskul'] as $e): ?>
-                                        • <?= e($e['nama_ekskul']) ?> (<?= e($e['predikat']) ?>)<br>
-                                    <?php endforeach; ?>
+                                <td class="text-start" style="font-size: 5.5pt; line-height: 1.0;">
+                                    <?php 
+                                    $ekskulTexts = [];
+                                    foreach ($row['ekskul'] as $e) {
+                                        $ekskulTexts[] = e($e['nama_ekskul']) . ' (' . e($e['predikat']) . ')';
+                                    }
+                                    echo implode(', ', $ekskulTexts);
+                                    ?>
                                 </td>
                             <?php endif; ?>
                             <!-- Prestasi -->
                             <?php if ($hasPrestasi): ?>
-                                <td class="text-start" style="font-size: 6.5pt; line-height: 1.1;">
-                                    <?php foreach ($row['prestasi'] as $p): ?>
-                                        • <?= e($p['nama_prestasi']) ?> (<?= e($p['tingkat']) ?>)<br>
-                                    <?php endforeach; ?>
+                                <td class="text-start" style="font-size: 5.5pt; line-height: 1.0;">
+                                    <?php 
+                                    $prestasiTexts = [];
+                                    foreach ($row['prestasi'] as $p) {
+                                        $prestasiTexts[] = e($p['nama_prestasi']) . ' (' . e($p['tingkat']) . ')';
+                                    }
+                                    echo implode(', ', $prestasiTexts);
+                                    ?>
                                 </td>
                             <?php endif; ?>
                         </tr>

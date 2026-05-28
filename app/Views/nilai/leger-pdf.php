@@ -36,7 +36,6 @@ $logoSma = imageToBase64(__DIR__ . '/../../../public/assets/img/logo-sman1-nobg.
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    // CSS untuk styling tabel
     <style>
         <?php 
         $cssPath = __DIR__ . '/../../../public/assets/css/pages/nilai.css';
@@ -154,18 +153,26 @@ $logoSma = imageToBase64(__DIR__ . '/../../../public/assets/img/logo-sman1-nobg.
 
                     <?php if ($hasEkskul): ?>
                         <!-- Ekskul -->
-                        <td class="text-wrap-col text-start-pdf" style="font-size: 5pt;">
-                            <?php foreach ($row['ekskul'] as $e): ?>
-                                • <?= e($e['nama_ekskul']) ?> (<?= e($e['predikat']) ?>)<br>
-                            <?php endforeach; ?>
+                        <td class="text-wrap-col text-start-pdf" style="font-size: 5pt; line-height: 1.0;">
+                            <?php 
+                            $ekskulTexts = [];
+                            foreach ($row['ekskul'] as $e) {
+                                $ekskulTexts[] = e($e['nama_ekskul']) . ' (' . e($e['predikat']) . ')';
+                            }
+                            echo implode(', ', $ekskulTexts);
+                            ?>
                         </td>
                     <?php endif; ?>
                     <?php if ($hasPrestasi): ?>
                         <!-- Prestasi -->
-                        <td class="text-wrap-col text-start-pdf" style="font-size: 5pt;">
-                            <?php foreach ($row['prestasi'] as $p): ?>
-                                • <?= e($p['nama_prestasi']) ?> (<?= e(str_replace(['Kabupaten/Kota', 'Kabupaten / Kota'], 'Kab/Kota', $p['tingkat'])) ?>)<br>
-                            <?php endforeach; ?>
+                        <td class="text-wrap-col text-start-pdf" style="font-size: 5pt; line-height: 1.0;">
+                            <?php 
+                            $prestasiTexts = [];
+                            foreach ($row['prestasi'] as $p) {
+                                $prestasiTexts[] = e($p['nama_prestasi']) . ' (' . e(str_replace(['Kabupaten/Kota', 'Kabupaten / Kota'], 'Kab/Kota', $p['tingkat'])) . ')';
+                            }
+                            echo implode(', ', $prestasiTexts);
+                            ?>
                         </td>
                     <?php endif; ?>
                 </tr>

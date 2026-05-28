@@ -5,7 +5,11 @@
 /* Buka modal konfirmasi hapus laporan satuan */
 function confirmDeleteLaporan(id) {
     const modal = new bootstrap.Modal(document.getElementById('deleteLaporanModal'));
-    document.getElementById('btnConfirmDeleteLaporan').href = laporanDeleteUrl + '&id=' + id;
+    const form = document.getElementById('formHapusLaporanSatuan');
+    if (form) {
+        form.action = laporanDeleteUrl;
+        document.getElementById('hapusIdLaporanSatuan').value = id;
+    }
     modal.show();
 }
 

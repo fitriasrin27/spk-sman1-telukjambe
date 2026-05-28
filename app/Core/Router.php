@@ -86,6 +86,7 @@ class Router
         'laporan/detail'       => ['App\\Controllers\\LaporanController', 'detail'],
         'laporan/delete'       => ['App\\Controllers\\LaporanController', 'delete'],
         'laporan/delete-batch' => ['App\\Controllers\\LaporanController', 'deleteBatch'],
+        'laporan/download'     => ['App\\Controllers\\LaporanController', 'download'],
 
         // AKUN
         'akun'         => ['App\\Controllers\\AkunController', 'index'],
@@ -97,12 +98,17 @@ class Router
         'profile'                 => ['App\\Controllers\\ProfileController', 'index'],
         'profile/update'          => ['App\\Controllers\\ProfileController', 'update'],
         'profile/update-foto'     => ['App\\Controllers\\ProfileController', 'updateFoto'],
+        'profile/delete-foto'     => ['App\\Controllers\\ProfileController', 'deleteFoto'],
         'profile/change-password' => ['App\\Controllers\\ProfileController', 'changePassword'],
 
         // NOTIFIKASI
         'notif/dismiss'   => ['App\\Controllers\\NotifController', 'dismiss'],
         'notif/clear-all' => ['App\\Controllers\\NotifController', 'clearAll'],
         'notif/add'       => ['App\\Controllers\\NotifController', 'add'],
+
+        // LOG AKTIVITAS
+        'log'             => ['App\\Controllers\\ActivityLogController', 'index'],
+        'log/api-fetch'   => ['App\\Controllers\\ActivityLogController', 'apiFetch'],
 
     ];
 

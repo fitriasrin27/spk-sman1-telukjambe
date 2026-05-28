@@ -88,6 +88,7 @@
     <table class="data-table">
         <thead>
             <?php $rs = (in_array('c1c4', $komponen) || in_array('n1n4', $komponen)) ? 2 : 1; ?>
+            <!-- Header Tabel -->
             <tr>
                 <th rowspan="<?= $rs ?>" style="width: 30px;">Rank</th>
                 <th rowspan="<?= $rs ?>" class="text-center">Nama Lengkap</th>
@@ -107,6 +108,7 @@
                 <?php if (in_array('ratarata', $komponen)): ?><th rowspan="<?= $rs ?>">Rata-Rata<br>Nilai</th><?php endif; ?>
             </tr>
             <?php if ($rs === 2): ?>
+            <!-- Sub Header Tabel -->
             <tr>
                 <?php if (in_array('c1c4', $komponen)): ?>
                     <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
@@ -140,11 +142,13 @@
                     </tr>
                 <?php endif; 
 
+                // Kelas untuk baris data
                 $rowClass = '';
                 if ($jenis === 'eligible' && in_array('status', $komponen)) {
                     $rowClass = ($i < $kuota) ? 'row-eligible' : 'row-not-eligible';
                 }
             ?>
+            <!-- Baris Data -->
                 <tr class="<?= $rowClass ?>">
                     <td><?= $i + 1 ?></td>
                     <td class="text-left"><?= $h['nama'] ?></td>
@@ -178,6 +182,7 @@
         <table class="footer-table">
             <tr>
                 <td>
+                    <!-- Tanda Tangan Kepala Sekolah -->
                     <div class="sign-box">
                         Mengetahui,<br>Kepala Sekolah
                         <div class="sign-space"></div>
@@ -187,6 +192,7 @@
                 </td>
                 <td></td>
                 <td>
+                    <!-- Tanda Tangan Wali Kelas/Guru BK -->
                     <div class="sign-box">
                         Karawang, <?= e($tglFinal) ?><br>
                         <?= ($jenis === 'kelas' ? 'Wali Kelas' : 'Guru BK') ?>

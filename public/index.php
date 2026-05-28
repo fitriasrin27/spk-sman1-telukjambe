@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('Asia/Jakarta');
+
 $sessionPath = __DIR__ . '/../storage/sessions';
 
 if (!is_dir($sessionPath)) {

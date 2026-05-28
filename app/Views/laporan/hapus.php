@@ -32,11 +32,14 @@
                 <i class="bi bi-exclamation-circle text-danger mb-3 d-block" style="font-size: 3rem;"></i>
                 <h5 class="fw-bold mb-1">Hapus Laporan?</h5>
                 <p class="text-muted small mb-4">File PDF juga akan dihapus permanen dari server.</p>
-                <!-- Tombol Aksi -->
-                <div class="d-flex gap-2 justify-content-center">
-                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
-                    <a href="#" id="btnConfirmDeleteLaporan" class="btn btn-danger px-4">Ya, Hapus</a>
-                </div>
+                <form id="formHapusLaporanSatuan" method="POST" action="">
+                    <input type="hidden" name="id" id="hapusIdLaporanSatuan" value="">
+                    <!-- Tombol Aksi -->
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger px-4">Ya, Hapus</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

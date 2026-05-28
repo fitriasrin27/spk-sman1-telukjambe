@@ -20,13 +20,16 @@
                 <!-- Info Tambahan -->
                 <p class="mt-2 mb-0 small text-muted">Data siswa di identitas siswa tidak akan terhapus.</p>
             </div>
-            <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
-                <!-- Tombol Batal -->
-                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
-                <a id="hapusRkLink" href="#" class="btn btn-danger px-4">
-                    <i class="bi bi-trash3 me-1"></i>Hapus
-                </a>
-            </div>
+            <form id="formHapusRiwayatKelas" method="POST" action="">
+                <input type="hidden" name="id" id="hapusIdRiwayatKelas" value="">
+                <div class="modal-footer border-0 pt-0 justify-content-center gap-2">
+                    <!-- Tombol Batal -->
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="bi bi-trash3 me-1"></i>Hapus
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

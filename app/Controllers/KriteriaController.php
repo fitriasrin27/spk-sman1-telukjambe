@@ -71,6 +71,7 @@ class KriteriaController extends Controller
                     'atribut' => $atribut,
                     'bobot' => $bobot
                 ]);
+                log_activity("Menambahkan kriteria baru: {$nama} ({$kode}, Bobot: {$bobot})", 'kriteria');
                 push_notif('Kriteria berhasil ditambahkan.');
             }
         }
@@ -109,6 +110,22 @@ class KriteriaController extends Controller
             $totalWithoutCurrent = $currentTotal - $oldBobot;
             $sisa = 1.00 - $totalWithoutCurrent;
 
+            $changes = [];
+            if ($currentData) {
+                if (trim($currentData['kode_kriteria']) !== $kode) {
+                    $changes[] = "Kode '" . $currentData['kode_kriteria'] . "' → '" . $kode . "'";
+                }
+                if (trim($currentData['nama_kriteria']) !== $nama) {
+                    $changes[] = "Nama '" . $currentData['nama_kriteria'] . "' → '" . $nama . "'";
+                }
+                if (trim($currentData['atribut']) !== $atribut) {
+                    $changes[] = "Atribut '" . $currentData['atribut'] . "' → '" . $atribut . "'";
+                }
+                if ((float)$currentData['bobot'] !== $bobot) {
+                    $changes[] = "Bobot '" . $currentData['bobot'] . "' → '" . $bobot . "'";
+                }
+            }
+
             if (round($totalWithoutCurrent + $bobot, 2) > 1.00) {
                 $_SESSION['error'] = 'Gagal: Total bobot melebihi batas 1.00. Sisa kuota bobot (termasuk kriteria ini) adalah ' . number_format($sisa, 2) . '.';
             } else {
@@ -118,6 +135,8 @@ class KriteriaController extends Controller
                     'atribut' => $atribut,
                     'bobot' => $bobot
                 ]);
+                $detailStr = !empty($changes) ? " (" . implode(", ", $changes) . ")" : " (tidak ada perubahan)";
+                log_activity("Memperbarui kriteria: {$nama} ({$kode})" . $detailStr, 'kriteria');
                 push_notif('Kriteria berhasil diperbarui.');
             }
         } else {
@@ -130,10 +149,20 @@ class KriteriaController extends Controller
     public function delete(): void
     {
         require_login();
-        $id = (int) ($_GET['id'] ?? 0);
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('kriteria');
+            return;
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
 
         if ($id > 0) {
-            (new \App\Models\Kriteria())->delete($id);
+            $model = new \App\Models\Kriteria();
+            $k = $model->findById($id);
+            $nama = $k ? $k['nama_kriteria'] : "ID {$id}";
+            $model->delete($id);
+            log_activity("Menghapus kriteria: {$nama}", 'kriteria');
             push_notif('Kriteria berhasil dihapus.');
         }
 

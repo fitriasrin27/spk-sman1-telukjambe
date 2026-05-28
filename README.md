@@ -15,6 +15,8 @@ Aplikasi **Sistem Pendukung Keputusan (SPK)** berbasis web untuk menentukan peme
 - **Export Laporan (PDF & Excel):** Pembuatan dokumen cetak resmi sekolah menggunakan standar kop surat.
 - **Manajemen Nilai Terpusat:** Riwayat akademik lengkap untuk 5 semester pertama.
 - **Import/Upload Data Massal:** Kemudahan input ratusan data siswa dan nilai dengan sekali upload file Excel (`.xlsx`).
+- **Log Aktivitas Real-Time:** Pemantauan seluruh aktivitas pengguna secara langsung (*live monitoring*) dengan deteksi browser, IP address, 5 kartu metrik harian, filter lengkap, dan kebijakan pembersihan otomatis (maks. 25.000 data, dibersihkan tiap Juni untuk log > 1 tahun).
+
 
 ---
 

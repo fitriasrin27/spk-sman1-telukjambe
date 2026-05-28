@@ -67,6 +67,7 @@ class KonversiController extends Controller
                     'nilai_asli' => $nilai_asli,
                     'nilai_konversi' => $nilai_konversi
                 ]);
+                log_activity("Menambahkan konversi nilai: Kriteria ID {$id_kriteria} ('{$nilai_asli}' → {$nilai_konversi})", 'kriteria');
                 push_notif('Data konversi berhasil ditambahkan.');
             }
         }
@@ -88,11 +89,27 @@ class KonversiController extends Controller
             if ($model->checkDuplicate($id_kriteria, $nilai_asli, $id)) {
                 $_SESSION['error'] = 'Data konversi untuk kriteria dan nilai asli tersebut sudah ada.';
             } else {
+                $currentData = $model->findById($id);
+                $changes = [];
+                if ($currentData) {
+                    if ((int)$currentData['id_kriteria'] !== $id_kriteria) {
+                        $changes[] = "ID Kriteria " . $currentData['id_kriteria'] . " → " . $id_kriteria;
+                    }
+                    if (trim($currentData['nilai_asli']) !== $nilai_asli) {
+                        $changes[] = "Nilai Asli '" . $currentData['nilai_asli'] . "' → '" . $nilai_asli . "'";
+                    }
+                    if ((float)$currentData['nilai_konversi'] !== $nilai_konversi) {
+                        $changes[] = "Nilai Konversi " . $currentData['nilai_konversi'] . " → " . $nilai_konversi;
+                    }
+                }
+
                 $model->update($id, [
                     'id_kriteria' => $id_kriteria,
                     'nilai_asli' => $nilai_asli,
                     'nilai_konversi' => $nilai_konversi
                 ]);
+                $detailStr = !empty($changes) ? " (" . implode(", ", $changes) . ")" : " (tidak ada perubahan)";
+                log_activity("Memperbarui konversi nilai: Kriteria ID {$id_kriteria} ('{$nilai_asli}')" . $detailStr, 'kriteria');
                 push_notif('Data konversi berhasil diperbarui.');
             }
         } else {
@@ -106,10 +123,18 @@ class KonversiController extends Controller
     {
         require_login();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('konversi');
+            return;
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $model = new Konversi();
+            $konv = $model->findById($id);
+            $asli = $konv ? $konv['nilai_asli'] : "ID {$id}";
             $model->delete($id);
+            log_activity("Menghapus konversi nilai untuk nilai asli: '{$asli}'", 'kriteria');
             push_notif('Data konversi berhasil dihapus.');
         }
 

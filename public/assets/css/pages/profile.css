@@ -14,10 +14,18 @@
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
 }
 
-/* Animasi tombol kamera saat hover di foto profil */
-.profile-avatar-wrapper:hover label {
-    transform: scale(1.1);
-    transition: transform 0.2s ease;
+.profile-avatar-action-btn {
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    transition: transform 0.2s ease !important;
+}
+
+.profile-avatar-action-btn:hover {
+    transform: scale(1.15) !important;
 }
 
 /* Animasi card naik saat di-hover */
@@ -27,4 +35,20 @@
 
 .card:hover {
     transform: translateY(-2px);
+}
+
+/* Custom Cropper.js bulat */
+.cropper-view-box,
+.cropper-face {
+    border-radius: 50%;
+    outline: none !important;
+}
+
+.cropper-line, .cropper-point {
+    display: none !important;
+}
+
+.cropper-dashed {
+    border-radius: 50%;
+    opacity: 0.3;
 }

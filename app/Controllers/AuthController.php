@@ -37,6 +37,7 @@ class AuthController extends Controller
         $user = $userModel->findByUsername($username);
 
         if (!$user || !password_verify($password, $user['password'])) {
+            log_activity("Gagal login sebagai '{$username}'", 'auth');
             $_SESSION['error'] = 'Username atau password tidak sesuai.';
             $this->redirect('login');
         }
@@ -54,11 +55,17 @@ class AuthController extends Controller
 
         $userModel->updateLastLogin((int) $user['id_user']);
 
+        log_activity("Berhasil login ke sistem", 'auth');
+
         $this->redirect('dashboard');
     }
 
     public function logout(): void
     {
+        if (is_logged_in()) {
+            log_activity("Logout dari sistem", 'auth');
+        }
+        
         $_SESSION = [];
         session_destroy();
 

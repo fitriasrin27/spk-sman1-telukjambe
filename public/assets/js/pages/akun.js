@@ -38,7 +38,11 @@ function populateEditModal(btn) {
 function confirmDelete(id, nama) {
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     document.getElementById('deleteTargetName').textContent = nama;
-    document.getElementById('btnConfirmDelete').href = akunDeleteUrl + '&id=' + id;
+    const form = document.getElementById('formHapusAkun');
+    if (form) {
+        form.action = akunDeleteUrl;
+        document.getElementById('hapusIdAkun').value = id;
+    }
     modal.show();
 }
 

@@ -13,11 +13,14 @@
                 <h5 class="mb-3">Yakin ingin menghapus data nilai ini?</h5>
                 <p class="text-muted mb-0">Semua data nilai, absensi, ekskul, dan prestasi untuk siswa <strong id="hapusNilaiNama"></strong> akan dihapus permanen.</p>
             </div>
-            <!-- modal footer -->
-            <div class="modal-footer bg-light justify-content-center border-0">
-                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Batal</button>
-                <a href="#" id="btnConfirmHapusNilai" class="btn btn-danger px-4">Ya, Hapus Data</a>
-            </div>
+            <form id="formHapusNilai" method="POST" action="">
+                <input type="hidden" name="id" id="hapusIdNilai" value="">
+                <!-- modal footer -->
+                <div class="modal-footer bg-light justify-content-center border-0">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger px-4">Ya, Hapus Data</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

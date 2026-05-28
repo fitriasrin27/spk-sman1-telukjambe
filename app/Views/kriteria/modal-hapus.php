@@ -2,9 +2,8 @@
 <div class="modal fade" id="modalHapusKriteria" tabindex="-1" aria-labelledby="modalHapusKriteriaLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <!-- Form Hapus -->
-        <form class="modal-content" method="GET" action="" id="formHapusKriteria">
+        <form class="modal-content" method="POST" action="<?= e(url('kriteria/delete')) ?>" id="formHapusKriteria">
             <!-- Hidden Fields -->
-            <input type="hidden" name="url" value="kriteria/delete">
             <input type="hidden" name="id" id="hapusIdKriteria">
             <!-- Modal Header -->
             <div class="modal-header">

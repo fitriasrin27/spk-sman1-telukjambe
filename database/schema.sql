@@ -113,7 +113,8 @@ CREATE TABLE perhitungan (
     tanggal_hitung DATETIME DEFAULT CURRENT_TIMESTAMP,
     id_user INT NOT NULL,
     catatan TEXT NULL,
-    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE RESTRICT
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE RESTRICT,
+    INDEX idx_perhitungan_filter (tahun_ajaran, kelas, semester_target)
 );
 
 CREATE TABLE hasil_perhitungan (
@@ -150,6 +151,21 @@ CREATE TABLE laporan (
     FOREIGN KEY (id_perhitungan) REFERENCES perhitungan(id_perhitungan) ON DELETE CASCADE,
     FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE RESTRICT
 );
+
+CREATE TABLE activity_logs (
+    id_log INT AUTO_INCREMENT PRIMARY KEY,
+    id_user INT NULL,
+    username_fallback VARCHAR(50) NULL,
+    aktivitas VARCHAR(255) NOT NULL,
+    modul VARCHAR(50) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    user_agent VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_user) REFERENCES users(id_user) ON DELETE SET NULL,
+    INDEX idx_logs_created_at (created_at),
+    INDEX idx_logs_modul (modul)
+);
+
 
 INSERT INTO kriteria (kode_kriteria, nama_kriteria, atribut, bobot) VALUES
 ('C1', 'Nilai Akademik', 'benefit', 0.60),

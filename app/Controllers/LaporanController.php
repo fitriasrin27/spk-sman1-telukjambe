@@ -11,6 +11,7 @@ class LaporanController extends Controller
 
     public function __construct()
     {
+        \App\Core\RoleAccess::check('laporan');
         $this->laporanModel = new Laporan();
     }
 
@@ -60,6 +61,9 @@ class LaporanController extends Controller
             exit;
         }
 
+        $filename = basename($laporan['file_path']);
+        log_activity("Melihat detail laporan: {$filename}", 'laporan');
+
         $this->view('laporan/detail', [
             'title'   => 'Laporan',
             'active'  => 'laporan',
@@ -73,7 +77,10 @@ class LaporanController extends Controller
         $id = (int)($_GET['id'] ?? 0);
         
         if ($id > 0) {
+            $l = $this->laporanModel->getById($id);
+            $file = $l ? basename($l['file_path']) : "ID {$id}";
             $this->laporanModel->delete($id);
+            log_activity("Menghapus file laporan: {$file}", 'laporan');
             push_notif('Laporan berhasil dihapus.');
         }
 
@@ -87,11 +94,33 @@ class LaporanController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ids']) && is_array($_POST['ids'])) {
             $ids = array_map('intval', $_POST['ids']);
             $this->laporanModel->deleteBatch($ids);
+            log_activity("Menghapus massal " . count($ids) . " berkas laporan", 'laporan');
             push_notif(count($ids) . ' laporan berhasil dihapus.');
         } else {
             $_SESSION['error'] = 'Tidak ada data yang dipilih.';
         }
         
         header('Location: ' . url('laporan'));
+    }
+
+    public function download(): void
+    {
+        require_login();
+        $id = (int)($_GET['id'] ?? 0);
+        
+        $l = $this->laporanModel->getById($id);
+        if (!$l) {
+            $_SESSION['error'] = 'Laporan tidak ditemukan.';
+            header('Location: ' . url('laporan'));
+            exit;
+        }
+
+        $filename = basename($l['file_path']);
+        log_activity("Mengunduh berkas laporan: {$filename}", 'laporan');
+        
+        push_notif("Berkas laporan {$filename} berhasil diunduh.");
+
+        header('Location: ' . asset($l['file_path']));
+        exit;
     }
 }

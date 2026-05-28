@@ -2,7 +2,7 @@
 <div class="modal fade" id="modalHapusKonversi" tabindex="-1" aria-labelledby="modalHapusKonversiLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
         <!-- Form Hapus -->
-        <form class="modal-content" method="GET" action="" id="formHapusKonversi">
+        <form class="modal-content" method="POST" action="<?= e(url('konversi/delete')) ?>" id="formHapusKonversi">
             <!-- Hidden ID -->
             <input type="hidden" name="id" id="hapusIdKonversi">
             <!-- Modal Header -->

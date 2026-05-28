@@ -15,10 +15,13 @@
                 <!-- Description -->
                 <p class="text-muted small mb-4">Akun <span id="deleteTargetName" class="fw-bold text-dark"></span> akan dihapus permanen.</p>
                 <!-- Modal Footer -->
-                <div class="d-flex gap-2 justify-content-center">
-                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
-                    <a id="btnConfirmDelete" href="#" class="btn btn-danger px-4">Ya, Hapus</a>
-                </div>
+                <form id="formHapusAkun" method="POST" action="">
+                    <input type="hidden" name="id" id="hapusIdAkun" value="">
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger px-4">Ya, Hapus</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -12,8 +12,25 @@ function tglIdTimeWIB($datetimeStr, $bulanId) {
     return "$tgl $bln $thn, $jam WIB";
 }
 
-$jenisLabel = $laporan['jenis_laporan'] === 'kelas' ? 'Peringkat Kelas' : 'Peringkat Eligible';
-$kelasJurusanLabel = $laporan['jenis_laporan'] === 'kelas' ? $laporan['batch_kelas'] : $laporan['jurusan'];
+if ($laporan['jenis_laporan'] === 'leger') {
+    $jenisLabel = 'Leger Nilai';
+    $meta = json_decode($laporan['komponen_laporan'], true);
+    if (!empty($meta)) {
+        $tahunAjaran = $meta['ta'] ?? '—';
+        $kelasJurusanLabel = ($meta['kelas'] ?? '—') . ' (' . ucfirst($meta['sem'] ?? '') . ')';
+    } else {
+        $filename = basename($laporan['file_path']);
+        $parts = explode('_', $filename);
+        $tahunAjaran = isset($parts[1]) ? str_replace('-', '/', $parts[1]) : '—';
+        $rawKelas = isset($parts[2]) ? str_replace('-', ' ', $parts[2]) : '—';
+        $rawSem   = isset($parts[3]) ? ucfirst($parts[3]) : '';
+        $kelasJurusanLabel = $rawKelas . ($rawSem ? " ($rawSem)" : "");
+    }
+} else {
+    $jenisLabel = $laporan['jenis_laporan'] === 'kelas' ? 'Peringkat Kelas' : 'Peringkat Eligible';
+    $kelasJurusanLabel = $laporan['jenis_laporan'] === 'kelas' ? $laporan['batch_kelas'] : $laporan['jurusan'];
+    $tahunAjaran = $laporan['tahun_ajaran'];
+}
 $judulFile = basename($laporan['file_path']);
 ?>
 
@@ -48,7 +65,7 @@ $judulFile = basename($laporan['file_path']);
             <div class="d-flex">
                 <div class="fw-bold" style="width: 140px;">Tahun Ajaran</div>
                 <div style="width: 20px;">:</div>
-                <div><?= e($laporan['tahun_ajaran']) ?></div>
+                <div><?= e($tahunAjaran) ?></div>
             </div>
             <div class="d-flex">
                 <div class="fw-bold" style="width: 140px;">Kelas/Jurusan</div>

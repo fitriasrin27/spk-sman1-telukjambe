@@ -16,6 +16,7 @@ class HasilController extends Controller
 
     public function __construct()
     {
+        \App\Core\RoleAccess::check('hasil');
         $this->kelasModel = new PerhitunganKelas();
         $this->eligibleModel = new PerhitunganEligible();
     }
@@ -292,6 +293,9 @@ class HasilController extends Controller
                 ':path'  => $filePath,
                 ':tgl'   => date('Y-m-d H:i:s')
             ]);
+
+            $jenisText = ($jenis === 'kelas') ? 'Peringkat Kelas' : 'Peringkat Eligible';
+            log_activity("Membuat laporan baru: {$filename} (Jenis: {$jenisText})", 'laporan');
 
             echo json_encode([
                 'success'      => true,

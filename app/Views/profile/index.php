@@ -20,6 +20,10 @@
                         $fotoPath = !empty($user['foto']) ? asset('public/uploads/profile/' . $user['foto']) : null;
                         if ($fotoPath): ?>
                             <img src="<?= $fotoPath ?>" id="previewFoto" class="rounded-circle shadow-sm border border-4 border-white" style="width: 150px; height: 150px; object-fit: cover;">
+                            <!-- Tombol Hapus Foto -->
+                            <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute bottom-0 start-0 shadow profile-avatar-action-btn" id="btnHapusFoto" title="Hapus Foto Profil">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
                         <?php else: ?>
                             <div id="initialsAvatar" class="rounded-circle shadow-sm d-flex align-items-center justify-content-center bg-primary text-white fw-bold fs-1 border border-4 border-white" style="width: 150px; height: 150px;">
                                 <?php 
@@ -32,12 +36,15 @@
                             <img src="" id="previewFoto" class="rounded-circle shadow-sm border border-4 border-white d-none" style="width: 150px; height: 150px; object-fit: cover;">
                         <?php endif; ?>
                         <!-- Form Ganti Foto -->
-                        <form action="<?= e(url('profile/update-foto')) ?>" method="POST" enctype="multipart/form-data" id="formUpdateFoto">
-                            <input type="hidden" name="id_user" value="<?= $user['id_user'] ?>">
-                            <label for="inputFoto" class="btn btn-sm btn-dark rounded-circle position-absolute bottom-0 end-0 p-2 shadow" style="cursor: pointer;" title="Ganti Foto">
+                        <form action="<?= e(url('profile/update-foto')) ?>" method="POST" id="formUpdateFoto">
+                            <input type="hidden" name="cropped_image" id="croppedImageInput">
+                            <label for="inputFoto" class="btn btn-sm btn-dark rounded-circle position-absolute bottom-0 end-0 shadow profile-avatar-action-btn" style="cursor: pointer;" title="Ganti Foto">
                                 <i class="bi bi-camera-fill"></i>
                             </label>
-                            <input type="file" name="foto" id="inputFoto" class="d-none" accept="image/*" onchange="handlePreview(this)">
+                            <input type="file" name="foto" id="inputFoto" class="d-none" accept="image/*">
+                        </form>
+                        <!-- Form Hapus Foto -->
+                        <form action="<?= e(url('profile/delete-foto')) ?>" method="POST" id="formHapusFoto">
                         </form>
                     </div>
 
@@ -83,13 +90,7 @@
                         </div>
                     </div>
 
-                    <!-- Form Save Foto -->
-                    <div id="saveFotoContainer" class="mt-4 d-none">
-                        <button type="button" class="btn btn-primary btn-sm w-100 rounded-pill py-2" onclick="document.getElementById('formUpdateFoto').submit()">
-                            <i class="bi bi-check2-circle me-1"></i> Simpan Foto Baru
-                        </button>
-                        <button type="button" class="btn btn-link btn-sm w-100 mt-1 text-decoration-none text-muted" onclick="window.location.reload()">Batal</button>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -105,7 +106,6 @@
                 <!-- Card Body -->
                 <div class="card-body p-4 pt-0">
                     <form action="<?= e(url('profile/update')) ?>" method="POST">
-                        <input type="hidden" name="id_user" value="<?= $user['id_user'] ?>">
                         <div class="row g-3">
 
                             <!-- Nama Lengkap -->
@@ -151,8 +151,6 @@
                 </div>
                 <div class="card-body p-4 pt-0">
                     <form action="<?= e(url('profile/change-password')) ?>" method="POST">
-
-                        <input type="hidden" name="id_user" value="<?= $user['id_user'] ?>">
                         <div class="row g-3">
                             <!-- Password Saat Ini -->
                             <div class="col-12">
@@ -202,5 +200,68 @@
 </div>
 
 
+<!-- Modal Crop Foto Profil -->
+<div class="modal fade" id="modalCrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalCropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalCropLabel">Sesuaikan Foto Profil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <div class="img-container mb-3 d-flex justify-content-center align-items-center" style="max-height: 350px; min-height: 250px; overflow: hidden; background: #f8f9fa; border-radius: 8px;">
+                    <img id="imageToCrop" src="" style="max-width: 100%; max-height: 350px; display: block;">
+                </div>
+                <!-- Control Buttons -->
+                <div class="d-flex justify-content-center gap-1 mb-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="btnZoomIn" title="Perbesar">
+                        <i class="bi bi-zoom-in"></i> Perbesar
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="btnZoomOut" title="Perkecil">
+                        <i class="bi bi-zoom-out"></i> Perkecil
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5" id="btnRotateLeft" title="Putar Kiri">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5" id="btnRotateRight" title="Putar Kanan">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 justify-content-between">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold" id="btnCropSave">Potong & Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus Foto Profil -->
+<div class="modal fade" id="modalHapusFoto" tabindex="-1" aria-labelledby="modalHapusFotoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-body text-center p-4">
+                <!-- Icon Peringatan -->
+                <div class="mb-3">
+                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <!-- Judul Modal -->
+                <h5 class="fw-bold mb-2" id="modalHapusFotoLabel">Hapus Foto Profil?</h5>
+                <!-- Deskripsi -->
+                <p class="text-muted small mb-4">
+                    Apakah Anda yakin ingin menghapus foto profil Anda? Tampilan akan dikembalikan menggunakan inisial nama Anda secara otomatis.
+                </p>
+                <!-- Tombol Aksi -->
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-danger fw-medium py-2 rounded-pill" id="btnKonfirmasiHapusFoto">Ya, Hapus Foto</button>
+                    <button type="button" class="btn btn-light py-2 rounded-pill" data-bs-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 <link rel="stylesheet" href="<?= e(asset('assets/css/pages/profile.css')); ?>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <script src="<?= e(asset('assets/js/pages/profile.js')); ?>"></script>

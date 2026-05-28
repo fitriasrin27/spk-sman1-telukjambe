@@ -45,7 +45,7 @@ class ProfileController extends Controller
             return;
         }
 
-        $idUser   = (int)$_POST['id_user'];
+        $idUser   = current_user()['id_user'];
         $nama     = trim($_POST['nama']);
         $username = trim($_POST['username']);
         $posisi   = trim($_POST['posisi']);
@@ -58,6 +58,24 @@ class ProfileController extends Controller
 
         $db = Database::connect();
         try {
+            // Ambil data profil lama untuk dibandingkan
+            $stmtOld = $db->prepare("SELECT nama, username, posisi FROM users WHERE id_user = ?");
+            $stmtOld->execute([$idUser]);
+            $oldData = $stmtOld->fetch(\PDO::FETCH_ASSOC);
+
+            $changes = [];
+            if ($oldData) {
+                if (trim($oldData['nama']) !== $nama) {
+                    $changes[] = "Nama '" . $oldData['nama'] . "' → '" . $nama . "'";
+                }
+                if (trim($oldData['username']) !== $username) {
+                    $changes[] = "Username @" . $oldData['username'] . " → @" . $username;
+                }
+                if (trim($oldData['posisi']) !== $posisi) {
+                    $changes[] = "Posisi '" . $oldData['posisi'] . "' → '" . $posisi . "'";
+                }
+            }
+
             $stmt = $db->prepare("UPDATE users SET nama = :nama, username = :username, posisi = :posisi WHERE id_user = :id");
             $stmt->execute([
                 ':nama'     => $nama,
@@ -70,6 +88,9 @@ class ProfileController extends Controller
             $_SESSION['user']['nama'] = $nama;
             $_SESSION['user']['username'] = $username;
             $_SESSION['user']['posisi'] = $posisi;
+
+            $detailStr = !empty($changes) ? " (" . implode(", ", $changes) . ")" : " (tidak ada perubahan)";
+            log_activity("Memperbarui profil diri: @" . $username . $detailStr, 'akun');
 
             push_notif('Profil berhasil diperbarui.');
         } catch (\Exception $e) {
@@ -85,51 +106,57 @@ class ProfileController extends Controller
     public function updateFoto(): void
     {
         require_login();
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_FILES['foto'])) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('profile');
             return;
         }
 
-        $file = $_FILES['foto'];
-        $idUser = (int)$_POST['id_user'];
+        $idUser = current_user()['id_user'];
+        $croppedData = $_POST['cropped_image'] ?? '';
 
-        // Validasi Upload
-        if ($file['error'] !== UPLOAD_ERR_OK) {
-            $_SESSION['error'] = 'Gagal upload file.';
+        if (empty($croppedData)) {
+            $_SESSION['error'] = 'Tidak ada gambar yang dikirim.';
             $this->redirect('profile');
             return;
         }
 
-        // Validasi Tipe File
-        $allowed = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!in_array($file['type'], $allowed)) {
-            $_SESSION['error'] = 'Format file harus JPG atau PNG.';
-            $this->redirect('profile');
-            return;
-        }
+        // Dekode Base64
+        try {
+            if (preg_match('/^data:image\/(\w+);base64,/', $croppedData, $type)) {
+                $data = substr($croppedData, strpos($croppedData, ',') + 1);
+                $type = strtolower($type[1]); // jpg, jpeg, png, dll
 
-        // Validasi Ukuran (Max 5MB)
-        if ($file['size'] > 5 * 1024 * 1024) {
-            $_SESSION['error'] = 'Ukuran file maksimal 5MB.';
-            $this->redirect('profile');
-            return;
-        }
+                if (!in_array($type, ['jpg', 'jpeg', 'png'])) {
+                    $_SESSION['error'] = 'Format file harus JPG atau PNG.';
+                    $this->redirect('profile');
+                    return;
+                }
 
-        $db = Database::connect();
-        $targetDir = 'public/uploads/profile/';
-        
-        // Buat folder jika belum ada
-        if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0777, true);
-        }
+                $data = base64_decode($data);
+                if ($data === false) {
+                    $_SESSION['error'] = 'Gagal memproses data gambar.';
+                    $this->redirect('profile');
+                    return;
+                }
+            } else {
+                $_SESSION['error'] = 'Format data gambar tidak valid.';
+                $this->redirect('profile');
+                return;
+            }
 
-        // Nama file unik
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $fileName = 'profile_' . $idUser . '_' . time() . '.' . $ext;
-        $targetFile = $targetDir . $fileName;
+            $db = Database::connect();
+            $targetDir = 'public/uploads/profile/';
+            
+            // Buat folder jika belum ada
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0777, true);
+            }
 
-        if (move_uploaded_file($file['tmp_name'], $targetFile)) {
-            try {
+            // Nama file unik
+            $fileName = 'profile_' . $idUser . '_' . time() . '.' . $type;
+            $targetFile = $targetDir . $fileName;
+
+            if (file_put_contents($targetFile, $data) !== false) {
                 // Ambil foto lama untuk dihapus
                 $oldData = $db->prepare("SELECT foto FROM users WHERE id_user = ?");
                 $oldData->execute([$idUser]);
@@ -145,12 +172,59 @@ class ProfileController extends Controller
                 }
 
                 $_SESSION['user']['foto'] = $fileName;
+                log_activity("Memperbarui foto profil diri", 'akun');
                 push_notif('Foto profil berhasil diperbarui.');
-            } catch (\Exception $e) {
-                $_SESSION['error'] = 'Gagal update database: ' . $e->getMessage();
+            } else {
+                $_SESSION['error'] = 'Gagal menyimpan berkas foto.';
             }
-        } else {
-            $_SESSION['error'] = 'Gagal memindahkan file.';
+        } catch (\Exception $e) {
+            $_SESSION['error'] = 'Gagal memperbarui foto profil: ' . $e->getMessage();
+        }
+
+        $this->redirect('profile');
+    }
+
+    /**
+     * Hapus Foto Profil
+     */
+    public function deleteFoto(): void
+    {
+        require_login();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('profile');
+            return;
+        }
+
+        $idUser = current_user()['id_user'];
+        $db = Database::connect();
+        $targetDir = 'public/uploads/profile/';
+
+        try {
+            // Ambil foto lama untuk dihapus
+            $stmt = $db->prepare("SELECT foto FROM users WHERE id_user = ?");
+            $stmt->execute([$idUser]);
+            $foto = $stmt->fetchColumn();
+
+            if ($foto) {
+                // Hapus berkas fisik
+                if (file_exists($targetDir . $foto)) {
+                    unlink($targetDir . $foto);
+                }
+
+                // Update db
+                $update = $db->prepare("UPDATE users SET foto = NULL WHERE id_user = ?");
+                $update->execute([$idUser]);
+
+                // Reset session
+                $_SESSION['user']['foto'] = null;
+
+                log_activity("Menghapus foto profil diri", 'akun');
+                push_notif('Foto profil berhasil dihapus.');
+            } else {
+                $_SESSION['error'] = 'Anda tidak memiliki foto profil untuk dihapus.';
+            }
+        } catch (\Exception $e) {
+            $_SESSION['error'] = 'Gagal menghapus foto profil: ' . $e->getMessage();
         }
 
         $this->redirect('profile');
@@ -167,7 +241,7 @@ class ProfileController extends Controller
             return;
         }
 
-        $idUser      = (int)$_POST['id_user'];
+        $idUser      = current_user()['id_user'];
         $oldPass     = $_POST['old_password'];
         $newPass     = $_POST['new_password'];
         $confirmPass = $_POST['confirm_password'];
@@ -191,11 +265,20 @@ class ProfileController extends Controller
                 return;
             }
 
-            // Update Password Baru
+            // Update Password Baru & Password Plain
             $newHashed = password_hash($newPass, PASSWORD_DEFAULT);
-            $update = $db->prepare("UPDATE users SET password = ? WHERE id_user = ?");
-            $update->execute([$newHashed, $idUser]);
+            
+            // Cek apakah password_plain ada
+            $colsPlain = $db->query("SHOW COLUMNS FROM users LIKE 'password_plain'")->fetch();
+            if ($colsPlain) {
+                $update = $db->prepare("UPDATE users SET password = ?, password_plain = ? WHERE id_user = ?");
+                $update->execute([$newHashed, $newPass, $idUser]);
+            } else {
+                $update = $db->prepare("UPDATE users SET password = ? WHERE id_user = ?");
+                $update->execute([$newHashed, $idUser]);
+            }
 
+            log_activity("Mengubah kata sandi profil diri", 'akun');
             push_notif('Password berhasil diganti.');
         } catch (\Exception $e) {
             $_SESSION['error'] = 'Gagal mengganti password: ' . $e->getMessage();

@@ -142,6 +142,7 @@ class PerhitunganEligibleController extends Controller
             // 5. Insert ke hasil_perhitungan
             $idPerhitungan = $this->model->hitungSAW($tahunAjaran, $jurusan, $idRiwayatList);
             if ($idPerhitungan > 0) {
+                log_activity("Menjalankan kalkulasi Peringkat Eligible SNBP SAW: Angkatan {$tahunAjaran} Jurusan {$jurusan}", 'perhitungan');
                 push_notif("Perhitungan Eligible angkatan $tahunAjaran $jurusan berhasil dilakukan.");
             }
         } catch (\Throwable $e) {
@@ -231,8 +232,16 @@ class PerhitunganEligibleController extends Controller
     public function delete(): void
     {
         require_login();
-        $id = (int)($_GET['id'] ?? 0);
-
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('perhitungan/eligible');
+            return;
+        }
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id === 0) {
+            $_SESSION['error'] = 'ID Perhitungan tidak valid.';
+            $this->redirect('perhitungan/eligible');
+            return;
+        }
         $db = \App\Core\Database::connect();
         try {
             $db->beginTransaction();
@@ -240,6 +249,7 @@ class PerhitunganEligibleController extends Controller
             $db->prepare("DELETE FROM peserta_eligible WHERE id_perhitungan = :id")->execute([':id' => $id]);
             $db->prepare("DELETE FROM perhitungan WHERE id_perhitungan = :id AND jenis_perhitungan = 'peringkat_eligible'")->execute([':id' => $id]);
             $db->commit();
+            log_activity("Menghapus riwayat perhitungan Peringkat Eligible ID: #{$id}", 'perhitungan');
             push_notif('Riwayat perhitungan eligible berhasil dihapus.');
         } catch (\Exception $e) {
             $db->rollBack();
@@ -276,6 +286,7 @@ class PerhitunganEligibleController extends Controller
             $db->prepare("DELETE FROM perhitungan WHERE id_perhitungan IN ($placeholders) AND jenis_perhitungan = 'peringkat_eligible'")->execute($ids);
             
             $db->commit();
+            log_activity("Menghapus massal " . count($ids) . " riwayat perhitungan Peringkat Eligible", 'perhitungan');
             push_notif(count($ids) . ' riwayat perhitungan eligible berhasil dihapus.');
         } catch (\Exception $e) {
             $db->rollBack();

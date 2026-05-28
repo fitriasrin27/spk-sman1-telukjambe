@@ -40,6 +40,7 @@ function resolveMenu(): array
         'laporan' => ['laporan', null],
         'akun' => ['akun', null],
         'profile' => ['profile', 'profile'],
+        'log' => ['log', null],
     ];
 
     return $map[$path] ?? [null, null];
@@ -47,7 +48,15 @@ function resolveMenu(): array
 
 function time_elapsed($datetime)
 {
-    $diff = time() - strtotime($datetime);
+    $tz = new \DateTimeZone('Asia/Jakarta');
+    $now = new \DateTime('now', $tz);
+    $then = new \DateTime($datetime, $tz);
+
+    $diff = $now->getTimestamp() - $then->getTimestamp();
+
+    if ($diff < 0) {
+        $diff = 0;
+    }
 
     if ($diff < 60) return "baru saja";
     if ($diff < 3600) return floor($diff/60) . " menit yang lalu";
@@ -82,4 +91,20 @@ function push_notif(string $message): void
 
     // Flag untuk toast popup (akan dikonsumsi sekali di layout)
     $_SESSION['notif_new'] = $entry;
+}
+
+/**
+ * Catat aktivitas ke database secara otomatis.
+ *
+ * @param string $activity Deskripsi tindakan
+ * @param string $module Nama modul (auth, siswa, nilai, perhitungan, kriteria, laporan, akun)
+ */
+function log_activity(string $activity, string $module): void
+{
+    try {
+        $logModel = new \App\Models\ActivityLog();
+        $logModel->insertLog($activity, $module);
+    } catch (\Throwable $e) {
+        error_log("Gagal mencatat log aktivitas: " . $e->getMessage());
+    }
 }

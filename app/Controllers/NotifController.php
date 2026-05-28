@@ -6,6 +6,11 @@ use App\Core\Controller;
 
 class NotifController extends Controller
 {
+    public function __construct()
+    {
+        require_login();
+    }
+
     /**
      * AJAX: hapus satu notif dari sesi berdasarkan index.
      * POST body: { index: 0 }

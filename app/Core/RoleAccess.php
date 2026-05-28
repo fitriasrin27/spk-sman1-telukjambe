@@ -21,6 +21,7 @@ class RoleAccess
         'hasil'           => ['operator', 'bk', 'wali_kelas', 'tu', 'wakasek'],
         'laporan'         => ['operator', 'kepala_sekolah', 'wakasek', 'bk', 'wali_kelas', 'tu'],
         'profile'         => ['operator', 'kepala_sekolah', 'wakasek', 'tu', 'bk', 'wali_kelas'],
+        'log'             => ['operator'],
     ];
 
     /**

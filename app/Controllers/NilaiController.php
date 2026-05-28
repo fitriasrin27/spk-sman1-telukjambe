@@ -154,6 +154,15 @@ class NilaiController extends Controller
 
         $db = \App\Core\Database::connect();
         try {
+            // Ambil data nilai lama untuk pencatatan rincian log
+            $oldNilaiStmt = $db->prepare("SELECT n.id_mapel, n.nilai, m.nama_mapel FROM nilai n JOIN mata_pelajaran m ON n.id_mapel = m.id_mapel WHERE n.id_riwayat = :id");
+            $oldNilaiStmt->execute([':id' => $idRiwayat]);
+            $oldNilai = $oldNilaiStmt->fetchAll(\PDO::FETCH_UNIQUE|\PDO::FETCH_ASSOC);
+
+            $oldAbsenStmt = $db->prepare("SELECT sakit, izin, alpa FROM absensi WHERE id_riwayat = :id");
+            $oldAbsenStmt->execute([':id' => $idRiwayat]);
+            $oldAbsen = $oldAbsenStmt->fetch(\PDO::FETCH_ASSOC) ?: ['sakit' => 0, 'izin' => 0, 'alpa' => 0];
+
             $db->beginTransaction();
             $this->saveNilaiData(
                 $db,
@@ -164,14 +173,54 @@ class NilaiController extends Controller
                 $_POST['prestasi'] ?? []
             );
             $db->commit();
-            push_notif('Data nilai ' . $this->getNamaSiswaByRiwayat($db, $idRiwayat) . ' berhasil diperbarui.');
+            
+            // Bandingkan perubahan nilai & absensi
+            $changes = [];
+            $nilaiInput = $_POST['nilai'] ?? [];
+            foreach ($nilaiInput as $n) {
+                $idMapel = (int)($n['id_mapel'] ?? 0);
+                $newNilai = $this->toNullableDecimal($n['nilai_angka'] ?? null);
+                if ($idMapel <= 0) continue;
+                
+                $oldN = isset($oldNilai[$idMapel]) ? (float)$oldNilai[$idMapel]['nilai'] : null;
+                $mapelName = isset($oldNilai[$idMapel]) ? $oldNilai[$idMapel]['nama_mapel'] : "Mapel ID {$idMapel}";
+                
+                if ($oldN !== $newNilai) {
+                    $oldStr = ($oldN !== null) ? $oldN : 'kosong';
+                    $newStr = ($newNilai !== null) ? $newNilai : 'kosong';
+                    $changes[] = "{$mapelName}: {$oldStr} → {$newStr}";
+                }
+            }
+            
+            $absenInput = $_POST['absen'] ?? [];
+            $newSakit = $this->toNonNegativeInt($absenInput['sakit'] ?? 0);
+            $newIzin = $this->toNonNegativeInt($absenInput['izin'] ?? 0);
+            $newAlpa = $this->toNonNegativeInt($absenInput['alpa'] ?? 0);
+            
+            if ((int)$oldAbsen['sakit'] !== $newSakit) {
+                $changes[] = "Sakit: {$oldAbsen['sakit']} → {$newSakit}";
+            }
+            if ((int)$oldAbsen['izin'] !== $newIzin) {
+                $changes[] = "Izin: {$oldAbsen['izin']} → {$newIzin}";
+            }
+            if ((int)$oldAbsen['alpa'] !== $newAlpa) {
+                $changes[] = "Alpa: {$oldAbsen['alpa']} → {$newAlpa}";
+            }
+
+            $namaSiswa = $this->getNamaSiswaByRiwayat($db, $idRiwayat);
+            $detailStr = !empty($changes) ? " (" . implode(", ", $changes) . ")" : " (tidak ada perubahan)";
+            log_activity("Memperbarui data nilai siswa: {$namaSiswa}{$detailStr}", 'nilai');
+            
+            push_notif('Data nilai ' . $namaSiswa . ' berhasil diperbarui.');
             if (($_POST['redirect_to'] ?? '') === 'detail') {
                 $this->redirect('nilai/detail&id=' . $idRiwayat);
                 return;
             }
             $this->redirect('nilai');
         } catch (\Exception $e) {
-            $db->rollBack();
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
             $_SESSION['error'] = 'Gagal menyimpan data: ' . $e->getMessage();
             $this->redirect('nilai');
         }
@@ -351,6 +400,7 @@ class NilaiController extends Controller
             $db->prepare("DELETE FROM ekstrakurikuler WHERE id_riwayat IN ($placeholders)")->execute($ids);
             $db->prepare("DELETE FROM prestasi WHERE id_riwayat IN ($placeholders)")->execute($ids);
             $db->commit();
+            log_activity("Menghapus massal " . count($ids) . " data nilai", 'nilai');
             push_notif(count($ids) . ' data nilai berhasil dihapus.');
         } catch (\Exception $e) {
             $db->rollBack();
@@ -362,7 +412,11 @@ class NilaiController extends Controller
     public function delete(): void
     {
         require_login();
-        $idRiwayat = (int)($_GET['id'] ?? 0);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('nilai');
+            return;
+        }
+        $idRiwayat = (int)($_POST['id'] ?? 0);
         if ($idRiwayat === 0) {
             $_SESSION['error'] = 'ID Riwayat tidak valid.';
             $this->redirect('nilai');
@@ -379,6 +433,7 @@ class NilaiController extends Controller
             $db->prepare("DELETE FROM ekstrakurikuler WHERE id_riwayat = :id")->execute([':id' => $idRiwayat]);
             $db->prepare("DELETE FROM prestasi WHERE id_riwayat = :id")->execute([':id' => $idRiwayat]);
             $db->commit();
+            log_activity("Menghapus data nilai: {$namaSiswa} (ID Riwayat: {$idRiwayat})", 'nilai');
             push_notif("Data nilai {$namaSiswa} berhasil dihapus.");
         } catch (\Exception $e) {
             $db->rollBack();
@@ -522,6 +577,7 @@ class NilaiController extends Controller
             }
             if ($sheetValid === 0) throw new \RuntimeException('Format tidak valid.');
             $db->commit();
+            log_activity("Mengimpor data nilai via Excel (Berhasil: {$imported}, Dilewati: {$skipped}, Tidak Ditemukan: {$notFound})", 'nilai');
             push_notif("{$imported} data diimport." . ($skipped?", {$skipped} dilewati":"") . ($notFound?", {$notFound} tidak ditemukan":""));
         } catch (\Throwable $e) {
             $db->rollBack();
@@ -666,6 +722,10 @@ class NilaiController extends Controller
                 ':komponen' => $komponenJson,
                 ':path'     => $filePath
             ]);
+
+            log_activity("Membuat laporan Leger Nilai PDF: Kelas {$kls} ({$ta} - Semester " . RiwayatKelas::labelSemester($sem) . ") ({$filename})", 'laporan');
+
+            push_notif("Laporan Leger Nilai Kelas {$kls} ({$ta}) berhasil dibuat.");
         }
 
         header('Content-Type: application/pdf'); 

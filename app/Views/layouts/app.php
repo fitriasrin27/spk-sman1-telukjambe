@@ -100,11 +100,18 @@
                     </li>
 
                     <?php if (current_user()['role'] === 'operator'): ?>
-                    <!-- Kelola Akun -->
-                    <li class="nav-item">
-                        <a class="nav-link <?= ($active === 'akun') ? 'active' : ''; ?>" href="<?= e(url('akun')); ?>">Kelola Akun</a>
+                    <!-- Kelola Akun Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle <?= in_array($active, ['akun', 'log']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown">
+                            Kelola Akun
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item <?= ($active === 'akun') ? 'sub-active' : ''; ?>" href="<?= e(url('akun')); ?>">Kelola Akun</a></li>
+                            <li><a class="dropdown-item <?= ($active === 'log') ? 'sub-active' : ''; ?>" href="<?= e(url('log')); ?>">Log Aktivitas</a></li>
+                        </ul>
                     </li>
                     <?php endif; ?>
+
                 </ul>
 
                 <!-- Nav Kanan: Notif & User -->

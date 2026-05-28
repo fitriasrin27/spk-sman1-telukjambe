@@ -72,6 +72,7 @@ class AkunController extends Controller
         }
 
         $model->insert($_POST);
+        log_activity("Membuat akun baru: @" . trim($_POST['username']) . " (Role: " . $_POST['role'] . ")", 'akun');
         push_notif('Akun berhasil ditambahkan.');
         $this->redirect('akun');
     }
@@ -96,7 +97,26 @@ class AkunController extends Controller
             $this->redirect('akun');
         }
 
+        $currentData = $model->findById($id);
+        $changes = [];
+        if ($currentData) {
+            if (trim($currentData['nama']) !== trim($_POST['nama'] ?? '')) {
+                $changes[] = "Nama '" . $currentData['nama'] . "' → '" . trim($_POST['nama']) . "'";
+            }
+            if (trim($currentData['username']) !== trim($_POST['username'] ?? '')) {
+                $changes[] = "Username @" . $currentData['username'] . " → @" . trim($_POST['username']);
+            }
+            if (($currentData['role'] ?? '') !== ($_POST['role'] ?? '')) {
+                $changes[] = "Role '" . $currentData['role'] . "' → '" . $_POST['role'] . "'";
+            }
+            if (!empty($_POST['password'])) {
+                $changes[] = "Mengubah password";
+            }
+        }
+
         $model->update($id, $_POST);
+        $detailStr = !empty($changes) ? " (" . implode(", ", $changes) . ")" : " (tidak ada perubahan)";
+        log_activity("Memperbarui akun: @" . trim($_POST['username']) . $detailStr, 'akun');
         push_notif('Akun berhasil diperbarui.');
         $this->redirect('akun');
     }
@@ -104,15 +124,29 @@ class AkunController extends Controller
     public function delete(): void
     {
         require_login();
-        $id = (int)($_GET['id'] ?? 0);
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('akun');
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
         
         if ($id > 0) {
             // Jangan biarkan hapus diri sendiri (optional, tapi baik untuk keamanan)
             if ($id === (int)($_SESSION['user']['id_user'] ?? 0)) {
                 $_SESSION['error'] = 'Anda tidak dapat menghapus akun Anda sendiri.';
             } else {
+                $db = \App\Core\Database::connect();
+                $stmtU = $db->prepare("SELECT username FROM users WHERE id_user = :id");
+                $stmtU->execute([':id' => $id]);
+                $usernameToDelete = $stmtU->fetchColumn() ?: "ID {$id}";
+
                 $model = new \App\Models\User();
                 $model->delete($id);
+                
+                log_activity("Menghapus akun: @{$usernameToDelete}", 'akun');
+                
                 push_notif('Akun berhasil dihapus.');
             }
         }

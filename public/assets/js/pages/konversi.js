@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             document.getElementById('hapusIdKonversi').value = this.dataset.id;
             document.getElementById('hapusNamaKonversi').textContent = this.dataset.nama;
-            document.getElementById('formHapusKonversi').action = this.dataset.deleteUrl + '?id=' + this.dataset.id;
+            document.getElementById('formHapusKonversi').action = this.dataset.deleteUrl;
         });
     });
 });

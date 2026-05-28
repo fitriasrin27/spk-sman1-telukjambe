@@ -227,7 +227,7 @@ $roleBadge = [
                                             </a>
                                             <span class="aksi-separator"></span>
                                             <!-- Tombol Unduh -->
-                                            <a href="<?= asset($l['file_path']) ?>" target="_blank" class="btn btn-sm btn-outline-success px-1 btn-unduh" style="font-size:0.75rem;">
+                                            <a href="<?= e(url('laporan/download')) . '&id=' . $l['id_laporan'] ?>" target="_blank" class="btn btn-sm btn-outline-success px-1 btn-unduh" style="font-size:0.75rem;">
                                                 <i class="bi bi-download me-1"></i>Unduh
                                             </a>
                                         
